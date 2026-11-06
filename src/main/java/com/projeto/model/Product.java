@@ -54,7 +54,7 @@ public abstract class Product {
     public abstract boolean requiresPrescription();
 
 
-    //Confere se a venda é permitida (quantidade e receita); se não for, lança uma exceção com o motivo.
+    //Confere se a venda é permitida (quantidade e receita etc); se não for, lança uma exceção com o motivo.
     public abstract void validateSale(int quantity, Prescription prescription);
 
 }
