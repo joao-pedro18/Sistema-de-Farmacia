@@ -1,14 +1,17 @@
 package service;
 
 import model.Product;
+import observer.StockObserver;
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class Inventory {
 
-    //Atributo da classe
+    //Atributos da classe
 
     private List<Product> products = new ArrayList<>();
+    private List<StockObserver> observers = new ArrayList<>();
 
     // Procura um produto pelo código. Devolve null se não existir
 
@@ -39,6 +42,7 @@ public class Inventory {
         }
         else {
             product.setQuantity(product.getQuantity() - quantity);
+            notifyObservers(product);
         }
     }
 
@@ -87,7 +91,28 @@ public class Inventory {
             }
             else {
                 product.setQuantity(product.getQuantity() + quantity);
+                notifyObservers(product);
             }
+    }
+
+    // Inscreve um observador para receber avisos quando o estoque mudar
+
+    public void addObserver(StockObserver observer){
+        observers.add(observer);
+    }
+
+    // Cancela a inscrição de um observador
+
+    public void removeObserver(StockObserver observer){
+        observers.remove(observer);
+    }
+
+    // Avisa todos os observadores inscritos que o produto mudou
+
+    private void notifyObservers(Product product){
+        for (StockObserver observer : observers){
+            observer.update(product);
+        }
     }
 }
 

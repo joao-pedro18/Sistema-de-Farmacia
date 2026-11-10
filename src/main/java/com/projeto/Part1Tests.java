@@ -5,6 +5,9 @@ import factory.RegularProductCreator;
 import model.Prescription;
 import model.Product;
 import model.ProductType;
+import observer.ExpirationAlert;
+import observer.LowStockAlert;
+import observer.RestockOrder;
 import service.Inventory;
 import service.ProductService;
 
@@ -18,6 +21,7 @@ public class Part1Tests {
         testInventory();
         testProductService();
         testValidateSale();
+        testObservers();
     }
 
     // Testa o Factory Method: cada criador devolve o tipo certo de produto
@@ -175,5 +179,70 @@ public class Part1Tests {
         checkSale("0 unidades", perfume, 0, null);
         checkSale("validade em 20 dias", perfumeSoon, 1, null);
         checkSale("produto vencido", perfumeExpired, 1, null);
+    }
+
+    // Testa o Observer: o Inventory avisa os observadores quando o estoque muda
+    private static void testObservers() {
+        System.out.println("\n=== Teste do Observer (alertas do estoque) ===");
+
+        Inventory inventory = new Inventory();
+
+        LowStockAlert lowStockAlert = new LowStockAlert();
+        ExpirationAlert expirationAlert = new ExpirationAlert();
+        RestockOrder restockOrder = new RestockOrder();
+
+        // Inscreve os três observadores no estoque
+        inventory.addObserver(lowStockAlert);
+        inventory.addObserver(expirationAlert);
+        inventory.addObserver(restockOrder);
+
+        LocalDate future = LocalDate.now().plusDays(120);
+        LocalDate soon = LocalDate.now().plusDays(10);
+        LocalDate past = LocalDate.now().minusDays(1);
+
+        inventory.addProduct(new RegularProductCreator().createProduct("301", "Dipirona", 8.50, 10, future, 5));
+        inventory.addProduct(new RegularProductCreator().createProduct("302", "Ibuprofeno", 9.00, 10, past, 2));
+        inventory.addProduct(new PerfumeProductCreator().createProduct("303", "Hidratante", 32.90, 10, soon, 2));
+
+        // Estoque ainda acima do mínimo: nenhum aviso
+        System.out.println("Baixa de 3 na Dipirona (10 -> 7, mínimo 5): nenhum aviso esperado");
+        inventory.decreaseStock("301", 3);
+
+        // Passou do mínimo: aviso de estoque baixo e pedido de reposição
+        System.out.println("Baixa de 3 na Dipirona (7 -> 4): aviso de estoque baixo e pedido de reposição");
+        inventory.decreaseStock("301", 3);
+
+        // Continua baixo: novo aviso, mas o pedido não se repete
+        System.out.println("Baixa de 1 na Dipirona (4 -> 3): novo aviso, mas sem pedido repetido");
+        inventory.decreaseStock("301", 1);
+
+        // Produto vencido: aviso de vencido
+        System.out.println("Baixa de 1 no Ibuprofeno (vencido): aviso de vencido");
+        inventory.decreaseStock("302", 1);
+
+        // Produto perto de vencer: aviso de perto de vencer
+        System.out.println("Baixa de 1 no Hidratante (validade em 10 dias): aviso de perto de vencer");
+        inventory.decreaseStock("303", 1);
+
+        // Mostra os pedidos de reposição registrados até agora
+        restockOrder.printOrders();
+
+        // Entrada de mercadoria também avisa, mas o estoque volta ao normal
+        System.out.println("Entrada de 20 na Dipirona (3 -> 23): nenhum aviso esperado");
+        inventory.increaseStock("301", 20);
+
+        // Remove um observador: ele deixa de receber avisos
+        inventory.removeObserver(lowStockAlert);
+        inventory.addProduct(new RegularProductCreator().createProduct("304", "Xarope", 15.00, 10, future, 8));
+        System.out.println("Sem o LowStockAlert, baixa de 5 no Xarope (10 -> 5, mínimo 8): só o pedido de reposição");
+        inventory.decreaseStock("304", 5);
+
+        System.out.println("Total de pedidos de reposição: " + restockOrder.getOrders().size());
+
+        // Um observador novo entra sem mexer na classe Inventory
+        inventory.addObserver(p -> System.out.println("  [Novo observador] Estoque do produto "
+                + p.getName() + " mudou para " + p.getQuantity()));
+        System.out.println("Novo observador registrado sem mexer no Inventory. Baixa de 1 na Dipirona (23 -> 22):");
+        inventory.decreaseStock("301", 1);
     }
 }
