@@ -2,82 +2,108 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import strategy.PaymentStrategy;
+import strategy.*;
 
 public class Sale {
+    // ATRIBUTOS DA CLASSE
     private List<ItemSale> items = new ArrayList<>();
     private Customer customer;
     private Employee employee;
-    private double total;
-    private double discount;
-    private PaymentStrategy paymentMethod;
-    private LocalDate date;
+    private Prescription prescription;
+    private DiscountStrategy discountStrategy;
+    private PaymentStrategy paymentStrategy;
+    private double discount;    
+    private LocalDateTime date;
 
-    public Sale(List<ItemSale> items, Customer customer, Employee employee, double total, double discount, PaymentStrategy paymentMethod, LocalDate date) {
-        this.items = items;
+    // CONSTRUTOR
+    public Sale(Customer customer, Employee employee) {
         this.customer = customer;
         this.employee = employee;
-        this.total = total;
-        this.discount = discount;
-        this.paymentMethod = paymentMethod;
-        this.date = date;
+        this.date = LocalDateTime.now();
     }
 
+    // GETTERS E SETTERS 
     public List<ItemSale> getItems() {
         return items;
-    }
-
-    public void setItems(List<ItemSale> items) {
-        this.items = items;
     }
 
     public Customer getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
     public Employee getEmployee() {
         return employee;
-    }
-
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
     }
 
     public double getDiscount() {
         return discount;
     }
 
-    public void setDiscount(double discount) {
-        this.discount = discount;
-    }
-
-    public PaymentStrategy getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(PaymentStrategy paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public String getPaymentMethod() {
+        return paymentStrategy.getName();
+    }
+
+    public Prescription getPrescription() {
+        return prescription;
+    }
+
+    public void setPrescription(Prescription prescription) {
+        this.prescription = prescription;
+    }
+
+    public void setDiscountStrategy(DiscountStrategy discountStrategy) {
+        this.discountStrategy = discountStrategy;
+    }
+
+    public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = paymentStrategy;
+    }
+
+    // OUTROS MÉTODOS
+    public void addItem(ItemSale item) {
+        items.add(item);
+    }
+
+    public boolean removeItem(String productCode) {
+        boolean remove = false;
+        // Percorre o carrinho e remove o item cujo produto tem o código informado
+        for (ItemSale item : items) {
+            if (item.getProduct().getCode().equals(productCode)) {
+                // Removeu, então já pode sair (evita erro de modificar a lista no for)
+                items.remove(item);
+                remove = true; 
+                break;
+            }
+        }
+
+        return remove; 
+    }
+
+    public double calculateSubtotal() {
+        double sumSubtotals = 0;
+
+        for (ItemSale item : items) {
+            sumSubtotals += item.getSubtotal();
+        }
+
+        return sumSubtotals; 
+    }
+
+    public void applyDiscount() {
+        discount = discountStrategy.calculate(calculateSubtotal(), customer);
+    }
+
+    public void pay() {
+        paymentStrategy.pay(getTotal());
+    }
+
+    public double getTotal() {
+        return calculateSubtotal() - discount;
     }
 }

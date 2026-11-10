@@ -24,4 +24,8 @@ public class ItemSale {
     public void setAmount(int amount) {
         this.amount = amount;
     }
+
+    public double getSubtotal() {
+        return product.getPrice() * amount;
+    }
 }
