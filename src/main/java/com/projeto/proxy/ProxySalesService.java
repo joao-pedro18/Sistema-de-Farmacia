@@ -2,10 +2,9 @@ package proxy;
 
 import java.util.ArrayList;
 import java.util.List;
+import model.*;
 
-import model.Employee;
-import model.Sale;
-
+// Proxy de proteção: valida o acesso antes de delegar ao serviço real
 public class ProxySalesService implements SalesService {
     private SalesService realService;
     private Employee loggedEmployee;
@@ -18,7 +17,26 @@ public class ProxySalesService implements SalesService {
 
     @Override
     public void finalizeSale(Sale sale) {
-        // AINDA FAZENDO
+        // Primeiro confere o perfil: controlado só pode ser vendido pelo farmacêutico
+        for (ItemSale item : sale.getItems()) {
+            if (item.getProduct().requiresPrescription()
+                    && loggedEmployee.getProfile() != Profile.PHARMACEUTICAL) {
+                String message = "Apenas o farmacêutico pode vender medicamento controlado.";
+
+                // Registra a tentativa negada para mostrar na apresentação
+                deniedAttempts.add(loggedEmployee.getName() + " tentou vender " + item.getProduct().getName() + ": " + message);
+
+                throw new IllegalStateException(message);
+            }
+        }
+
+        // Depois valida as regras de cada produto (quantidade, receita)
+        for (ItemSale item : sale.getItems()) {
+            item.getProduct().validateSale(item.getAmount(), sale.getPrescription());
+        }
+
+        // Tudo certo: delega ao serviço real
+        realService.finalizeSale(sale);
     }
 
     public List<String> getDeniedAttempts() {
