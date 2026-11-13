@@ -17,7 +17,7 @@ public class EmployeeService {
         Employee employee = null;
 
         for (Employee e : employees) {
-            if (e.getName() == name) {
+            if (name.equals(e.getName())) {
                 employee = e;
             }
         }
