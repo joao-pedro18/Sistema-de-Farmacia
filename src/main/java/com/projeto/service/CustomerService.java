@@ -2,7 +2,6 @@ package service;
 
 import model.Customer;
 import model.CustomerType;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -24,11 +23,9 @@ public class CustomerService {
         return null;
     }
 
-
     //Cadastra um cliente novo. Não permite CPF repetido
 
     public Customer registerCustomer(String name, String cpf, CustomerType type){
-
 
         if (name == null || name.isBlank()){
             throw new IllegalArgumentException("Nome do cliente não informado!");
@@ -67,7 +64,7 @@ public class CustomerService {
 
     //Devolve uma cópia da lista de clientes do sistema
 
-    public List<Customer> customers(){
+    public List<Customer> listCustomers(){
         return new ArrayList<>(customers);
     }
 

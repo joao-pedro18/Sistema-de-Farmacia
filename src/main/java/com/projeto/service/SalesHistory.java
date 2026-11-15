@@ -17,7 +17,7 @@ public class SalesHistory {
         return new ArrayList<>(sales);
     }
 
-    //Adiciona uma venda no historico de vendas 
+    //Adiciona uma venda no historico de vendas
 
     public void addSale(Sale sale){
 

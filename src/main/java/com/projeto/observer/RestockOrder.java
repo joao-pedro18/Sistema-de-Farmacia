@@ -22,6 +22,9 @@ public class RestockOrder implements StockObserver {
                 System.out.println("Pedido de reposição registrado para o produto " + product.getName());
             }
         }
+        else {
+            productsToRestock.remove(product);
+        }
     }
 
     // Devolve uma cópia da lista de produtos com pedido de reposição
