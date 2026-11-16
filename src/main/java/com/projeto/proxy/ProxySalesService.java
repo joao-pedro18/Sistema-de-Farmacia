@@ -1,6 +1,8 @@
 package proxy;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import model.*;
 
@@ -31,8 +33,12 @@ public class ProxySalesService implements SalesService {
         }
 
         // Depois valida as regras de cada produto (quantidade, receita)
+        Map<Product, Integer> totals = new LinkedHashMap<>();
         for (ItemSale item : sale.getItems()) {
-            item.getProduct().validateSale(item.getAmount(), sale.getPrescription());
+            totals.merge(item.getProduct(), item.getAmount(), Integer::sum);
+        }
+        for (Map.Entry<Product, Integer> entry : totals.entrySet()) {
+            entry.getKey().validateSale(entry.getValue(), sale.getPrescription());
         }
 
         // Tudo certo: delega ao serviço real
