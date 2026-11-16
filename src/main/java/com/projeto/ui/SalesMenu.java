@@ -34,7 +34,7 @@ public class SalesMenu {
 
             customer = customerService.findByCpf(cpf);
 
-            if (cpf != null) {
+            if (customer != null) {
                 System.out.println("Cliente: " + customer.getName() + " | CPF: " + customer.getCpf() + "\n");
                 break;
             } 
@@ -57,7 +57,13 @@ public class SalesMenu {
             }
 
             System.out.println("Quantidade do produto: ");
-            int quantity = Integer.parseInt(scanner.nextLine().trim());
+            int quantity;
+            try {
+                quantity = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Quantidade inválida.");
+                continue;
+            }
 
             if (quantity <= 0) { 
                 System.out.println("Quantidade inválida.");
@@ -127,7 +133,13 @@ public class SalesMenu {
             System.out.println("2 - Pix");
             System.out.println("3 - Dinheiro");
             System.out.print("Opção: ");
-            int option = Integer.parseInt(scanner.nextLine().trim());
+            int option;
+            try {
+                option = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Opção inválida.\n");
+                continue;
+            }
 
             switch (option) {
                 case 1:
@@ -138,7 +150,13 @@ public class SalesMenu {
                     break;
                 case 3:
                     System.out.print("Dinheiro recebido: ");
-                    double receivedAmount = Double.parseDouble(scanner.nextLine().trim());
+                    double receivedAmount;
+                    try {
+                        receivedAmount = Double.parseDouble(scanner.nextLine().trim().replace(",", "."));
+                    } catch (NumberFormatException e) {
+                        System.out.println("Valor inválido.\n");
+                        break;
+                    }
                     paymentMethod = new CashPayment(receivedAmount);
                     break;
                 default:
