@@ -102,7 +102,7 @@ public class SalesMenu {
             case REGULAR:
                 discountType = new NoDiscount();
                 break;
-        
+
             case SENIOR:
                 discountType = new DiscountSeniors();
                 break;
@@ -111,7 +111,7 @@ public class SalesMenu {
                 discountType = new PartnershipDiscount();
                 break;
 
-            case LOYALTY:
+            default:
                 discountType = new LoyaltyDiscount();
                 break;
         }
